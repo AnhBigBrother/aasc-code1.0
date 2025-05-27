@@ -262,7 +262,7 @@ const AddContact = ({ addItem }: { addItem: (item: TableDataItem) => void }) => 
                     <FormLabel>Address</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder='Address...'
+                        placeholder='Wololo street'
                         className='bg-background'
                         {...field}></Input>
                     </FormControl>

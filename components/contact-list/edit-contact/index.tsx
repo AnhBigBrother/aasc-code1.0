@@ -21,7 +21,6 @@ import { useForm } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -159,8 +158,7 @@ const EditContact = ({
       </DialogTrigger>
       <DialogContent className="max-w-fit flex flex-col">
         <DialogHeader>
-          <DialogTitle>New contact</DialogTitle>
-          <DialogDescription>Create a new contact.</DialogDescription>
+          <DialogTitle>Edit contact</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -305,7 +303,7 @@ const EditContact = ({
                     <FormLabel>Address</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Address..."
+                        placeholder="Wololo street"
                         className="bg-background"
                         {...field}
                       ></Input>
