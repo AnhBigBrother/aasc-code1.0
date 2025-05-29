@@ -41,6 +41,10 @@ const EditContact = ({
 }: TableDataItem) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, setIsPending] = useState<boolean>(false);
+  const [bankDetailId, setBankDetailId] = useState("");
+  const [userPhoneID, setUserPhoneID] = useState("");
+  const [userEmailID, setUserEmailID] = useState("");
+  const [userWebsiteID, setUserWebsiteID] = useState("");
   const form = useForm<ContactData>({
     resolver: zodResolver(ContactDataSchema),
     defaultValues: {
@@ -63,11 +67,14 @@ const EditContact = ({
       setIsPending(true);
       // get contact's email, phone, website
       bitrix24Request("crm.contact.get", { ID: ID })
-        .then(({ result }: { result: ContactPayload["FIELDS"] }) => {
+        .then(({ result }) => {
           console.log("contact data:", result);
           form.setValue("email", result.EMAIL[0].VALUE);
           form.setValue("phone_number", result.PHONE[0].VALUE);
           form.setValue("website", result.WEB[0].VALUE);
+          setUserEmailID(result.EMAIL[0].ID);
+          setUserPhoneID(result.PHONE[0].ID);
+          setUserWebsiteID(result.WEB[0].ID);
         })
         .catch((err) => {
           console.error(err);
@@ -96,6 +103,7 @@ const EditContact = ({
                 RQ_ACC_NUM,
               });
               // update form values
+              setBankDetailId(ID);
               form.setValue("bank", RQ_BANK_NAME);
               form.setValue("bank_account_number", RQ_ACC_NUM);
             },
@@ -112,7 +120,8 @@ const EditContact = ({
   }, [isOpen]);
   const onSubmit = async (data: ContactData) => {
     setIsPending(true);
-    const payload: ContactPayload = {
+    const payload = {
+      ID: ID,
       FIELDS: {
         NAME: data.first_name,
         LAST_NAME: data.last_name,
@@ -120,18 +129,21 @@ const EditContact = ({
         HAS_EMAIL: "Y",
         EMAIL: [
           {
+            ID: userEmailID,
             VALUE: data.email,
             VALUE_TYPE: "HOME",
           },
         ],
         PHONE: [
           {
+            ID: userPhoneID,
             VALUE: data.phone_number,
             VALUE_TYPE: "HOME",
           },
         ],
         WEB: [
           {
+            ID: userWebsiteID,
             VALUE: data.website,
             VALUE_TYPE: "HOME",
           },
@@ -144,13 +156,33 @@ const EditContact = ({
       },
     };
     console.log(payload);
-    bitrix24Request("crm.contact.add", payload)
-      .then((result) => {
-        console.log(result);
+    bitrix24Request("crm.contact.update", payload).then((result) => {
+      console.log(result);
+      // update the bank detail
+      bitrix24Request("crm.requisite.bankdetail.update", {
+        ID: bankDetailId,
+        FIELDS: {
+          NAME: data.bank,
+          RQ_BANK_NAME: data.bank,
+          RQ_ACC_NUM: data.bank_account_number,
+        },
       })
-      .catch((err) => console.error(err))
-      .finally(() => setIsPending(false));
+        .then(() => {
+          toast.success("Success!", { position: "top-right" });
+        })
+        .catch((err) => {
+          console.error(err);
+          toast.error("Something went wrong, try later!", {
+            position: "top-right",
+          });
+        })
+        .finally(() => {
+          setIsPending(false);
+          setIsOpen(false);
+        });
+    });
   };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger className="cursor-pointer w-full px-3 py-1 text-start rounded-md hover:bg-secondary">

@@ -21,7 +21,6 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Ellipsis } from "lucide-react";
-import { Item } from "@radix-ui/react-dropdown-menu";
 
 export type TableDataItem = {
   ID: string;
